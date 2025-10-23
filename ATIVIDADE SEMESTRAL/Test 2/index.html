@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agendamento de Consultas</title>
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 500px;
+      margin: 40px auto;
+    }
+    input, select {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #mensagem {
+      margin-top: 15px;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 4px;
+      display: none;
+    }
+    .erro {
+      background-color: #ffe5e5;
+      color: #c00;
+      border: 1px solid #c00;
+      display: block;
+    }
+    .sucesso {
+      background-color: #e6ffe6;
+      color: #007700;
+      border: 1px solid #007700;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h2>Agendar Consulta</h2>
+  <form id="formConsulta">
+    <label>Nome:</label>
+    <input type="text" id="nome" required>
+
+    <label>RG:</label>
+    <input type="text" id="rg" required>
+
+    <label>E-mail:</label>
+    <input type="email" id="email" required>
+
+    <label>Médico:</label>
+    <select id="medico" required>
+      <option value="">Selecione um médico</option>
+      <option value="Dra. Ana">Dra. Ana</option>
+      <option value="Dr. Paulo">Dr. Paulo</option>
+      <option value="Dr. Silva">Dr. Silva</option>
+    </select>
+
+    <label>Data da Consulta:</label>
+    <input type="date" id="dataConsulta" required>
+
+    <button type="submit">Agendar</button>
+  </form>
+
+  <div id="mensagem"></div>
+
+  <script>
+    const form = document.getElementById("formConsulta");
+    const mensagem = document.getElementById("mensagem");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const dados = {
+        nome: document.getElementById("nome").value,
+        rg: document.getElementById("rg").value,
+        email: document.getElementById("email").value,
+        medico: document.getElementById("medico").value,
+        data: document.getElementById("dataConsulta").value,
+      };
+
+      mensagem.style.display = "none";
+
+      try {
+        const resposta = await fetch("http://localhost:3000/consultas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dados),
+        });
+
+        const resultado = await resposta.json();
+
+        if (resposta.ok) {
+          mensagem.textContent = resultado.mensagem;
+          mensagem.className = "sucesso";
+          mensagem.style.display = "block";
+          form.reset();
+        } else {
+          mensagem.textContent = resultado.erro || "Erro ao agendar a consulta.";
+          mensagem.className = "erro";
+          mensagem.style.display = "block";
+        }
+      } catch (erro) {
+        mensagem.textContent = "Erro de conexão com o servidor.";
+        mensagem.className = "erro";
+        mensagem.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>
